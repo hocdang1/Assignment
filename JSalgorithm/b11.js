@@ -30,7 +30,9 @@ function incrementString(str) {
   // Construct the new string with leading zeros if necessary
   return str.slice(0, -numberPart.length) + '0'.repeat(Math.max(0, leadingZeros)) + incrementedNumber;
 }
-
+// function incrementString(text) {
+//     return text.replace(/(\d*)$/, (_, t) => (+t + 1).toString().padStart(t.length, 0));
+// }
 // Example usage:
 console.log(incrementString("foo")); // Output: "foo1"
 console.log(incrementString("foobar23")); // Output: "

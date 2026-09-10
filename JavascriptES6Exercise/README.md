@@ -208,17 +208,20 @@ showMessAfterTimeout("", "Foo", 100, function (msg) {
 
 
 ES6
-function showMessAfterTimeout(msg, who, timeout, onDone) {
-  setTimeout(() => {
-    onDone(msg + " Hi " + who + "!");
-  }, timeout);
+function showMessAfterTimeout(msg, who, timeout) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(msg + " Hi " + who + "!");
+    }, timeout);
+  });
+}
+async function main() {
+  let msg = await showMessAfterTimeout("", "Foo", 100);
+  msg = await showMessAfterTimeout(msg, "Bar", 200);
+  console.log("Finish after 300ms:" + msg);
 }
 
-showMessAfterTimeout("", "Foo", 100, msg => {
-  showMessAfterTimeout(msg, "Bar", 200, msg => {
-    console.log("Finish after 300ms:" + msg);
-  });
-});
+main();
 9. Loops
 - Give an example for each method:
   - for…of

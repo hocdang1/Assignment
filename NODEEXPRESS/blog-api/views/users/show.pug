@@ -1,0 +1,69 @@
+extends ../layout
+
+block content
+  if fromComment
+    p.note This user wrote comment ##{fromComment.id}: "#{fromComment.content}"
+
+  section
+    h2 Information
+    table.detail
+      tr
+        th ID
+        td= user.id
+      tr
+        th Name
+        td= user.name
+      tr
+        th Age
+        td= user.age
+      tr
+        th Email
+        td= user.email
+      tr
+        th Birthday
+        td= user.birthday ? user.birthday.toISOString().slice(0, 10) : '-'
+      tr
+        th Status
+        td= user.status === 1 ? 'Active' : 'Inactive'
+
+  section
+    h2 Profile
+    if user.profile
+      table.detail
+        tr
+          th Address
+          td= user.profile.address
+        tr
+          th Tel
+          td= user.profile.tel
+        tr
+          th Province
+          td= user.profile.province
+    else
+      p.empty No profile.
+
+  section
+    h2 Posts (#{user.posts ? user.posts.length : 0})
+    if user.posts && user.posts.length
+      ul
+        each post in user.posts
+          li
+            = post.content
+            if post.comments && post.comments.length
+              ul
+                each c in post.comments
+                  li= c.content
+    else
+      p.empty No posts.
+
+  section
+    h2 Comments (#{user.comments ? user.comments.length : 0})
+    if user.comments && user.comments.length
+      ul
+        each comment in user.comments
+          li= comment.content
+    else
+      p.empty No comments.
+
+  p
+    a(href='/users') ← Back to user list

@@ -1,0 +1,32 @@
+extends ../layout
+
+block content
+  if errors && errors.length
+    ul.errors
+      each err in errors
+        li= err
+
+  form(method='POST', action='/users')
+    div
+      label(for='name') Name *
+      input#name(type='text', name='name', value=old.name || '', required)
+    div
+      label(for='age') Age
+      input#age(type='number', name='age', value=old.age || '', min='0')
+    div
+      label(for='email') Email *
+      input#email(type='email', name='email', value=old.email || '', required)
+    div
+      label(for='password') Password *
+      input#password(type='password', name='password', required, minlength='6')
+    div
+      label(for='birthday') Birthday
+      input#birthday(type='date', name='birthday', value=old.birthday || '')
+    div
+      label(for='status') Status
+      select#status(name='status')
+        option(value='1', selected=String(old.status) !== '0') Active
+        option(value='0', selected=String(old.status) === '0') Inactive
+    div
+      button.btn.btn-primary(type='submit') Create
+      a.btn(href='/users') Cancel

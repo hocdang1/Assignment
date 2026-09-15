@@ -1,0 +1,32 @@
+extends ../layout
+
+block content
+  p
+    a.btn.btn-primary(href='/users/create') + Create user
+
+  if users.length === 0
+    p.empty No users yet.
+  else
+    table
+      thead
+        tr
+          th ID
+          th Name
+          th Age
+          th Email
+          th Birthday
+          th Status
+          th Actions
+      tbody
+        each user in users
+          tr
+            td= user.id
+            td
+              a(href=`/users/${user.id}/posts`, title='View posts')= user.name
+            td= user.age
+            td= user.email
+            td= user.birthday ? user.birthday.toISOString().slice(0, 10) : '-'
+            td= user.status === 1 ? 'Active' : 'Inactive'
+            td
+              a.btn(href=`/users/${user.id}`) Show
+              a.btn(href=`/users/${user.id}/comments`) Comments 

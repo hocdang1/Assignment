@@ -1,0 +1,23 @@
+extends ../layout
+
+block content
+  p
+    a(href='/users') ← Back to user list
+    |  |
+    a(href=`/users/${user.id}`) User detail
+
+  if posts.length === 0
+    p.empty This user has no posts.
+  else
+    table
+      thead
+        tr
+          th ID
+          th Content
+          th Created at
+      tbody
+        each post in posts
+          tr
+            td= post.id
+            td= post.content
+            td= post.created_at ? post.created_at.toISOString().slice(0, 16).replace('T', ' ') : '-'

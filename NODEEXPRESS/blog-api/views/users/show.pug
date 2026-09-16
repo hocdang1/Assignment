@@ -21,32 +21,32 @@ block content
         td= user.email
       tr
         th Birthday
-        td= user.birthday ? user.birthday.toISOString().slice(0, 10) : '-'
+        td= fmtDate(user.birthday)
       tr
         th Status
         td= user.status === 1 ? 'Active' : 'Inactive'
 
   section
     h2 Profile
-    if user.profile
+    if profile
       table.detail
         tr
           th Address
-          td= user.profile.address
+          td= profile.address
         tr
           th Tel
-          td= user.profile.tel
+          td= profile.tel
         tr
           th Province
-          td= user.profile.province
+          td= profile.province
     else
       p.empty No profile.
 
   section
-    h2 Posts (#{user.posts ? user.posts.length : 0})
-    if user.posts && user.posts.length
+    h2 Posts (#{posts.length})
+    if posts.length
       ul
-        each post in user.posts
+        each post in posts
           li
             = post.content
             if post.comments && post.comments.length
@@ -57,11 +57,14 @@ block content
       p.empty No posts.
 
   section
-    h2 Comments (#{user.comments ? user.comments.length : 0})
-    if user.comments && user.comments.length
+    h2 Comments (#{comments.length})
+    if comments.length
       ul
-        each comment in user.comments
-          li= comment.content
+        each comment in comments
+          li
+            = comment.content
+            if comment.post
+              small  (on post ##{comment.post.id})
     else
       p.empty No comments.
 

@@ -5,6 +5,7 @@ const createError = require('http-errors');
 
 const usersRouter = require('./routes/users');
 const commentsRouter = require('./routes/comments');
+const userApiRouter = require('./routes/userApi');
 
 const app = express();
 
@@ -19,10 +20,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => res.redirect('/users'));
 app.use('/users', usersRouter);
 app.use('/comments', commentsRouter);
+app.use('/api/users', userApiRouter);
 
 // 404
 app.use((req, res, next) => next(createError(404)));
 
+app.locals.fmtDate = (v) => {
+  if (!v) return '-';
+  const d = v instanceof Date ? v : new Date(v);
+  return isNaN(d) ? '-' : d.toISOString().slice(0, 10);
+};
 // error handler — 4 tham số
 app.use((err, req, res, next) => {
   if (res.headersSent) return next(err);

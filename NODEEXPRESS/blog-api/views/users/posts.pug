@@ -20,4 +20,4 @@ block content
           tr
             td= post.id
             td= post.content
-            td= post.created_at ? post.created_at.toISOString().slice(0, 16).replace('T', ' ') : '-'
+            td= post.createdAt ? post.createdAt.toISOString().slice(0, 16).replace('T', ' ') : '-'

@@ -1,21 +1,57 @@
 extends ../layout
 
 block content
+  -
+    function sortUrl(field) {
+      const nextDir = (sort === field && dir === 'asc') ? 'desc' : 'asc';
+      const params = new URLSearchParams();
+      if (q) params.set('q', q);
+      params.set('sort', field);
+      params.set('dir', nextDir);
+      return '/users?' + params.toString();
+    }
+    function pageUrl(p) {
+      const params = new URLSearchParams();
+      if (q) params.set('q', q);
+      params.set('sort', sort);
+      params.set('dir', dir);
+      params.set('page', p);
+      return '/users?' + params.toString();
+    }
+    function arrow(field) {
+      if (sort !== field) return '';
+      return dir === 'asc' ? ' ▲' : ' ▼';
+    }
+
   p
-    a.btn.btn-primary(href='/users/create') + Create user
+    button.btn.btn-primary#btnCreate(type='button') + Create user
+
+  form.search(method='GET', action='/users')
+    input(type='text', name='q', placeholder='Search by name...', value=q || '')
+    input(type='hidden', name='sort', value=sort)
+    input(type='hidden', name='dir', value=dir)
+    button.btn(type='submit') Search
+    if q
+      a.btn(href='/users') Clear
 
   if users.length === 0
-    p.empty No users yet.
+    p.empty= q ? `No users found for "${q}".` : 'No users yet.'
   else
     table
       thead
         tr
           th ID
-          th Name
-          th Age
+          th
+            a(href=sortUrl('name')) Name#{arrow('name')}
+          th
+            a(href=sortUrl('age')) Age#{arrow('age')}
           th Email
           th Birthday
           th Status
+          th
+            a(href=sortUrl('postsCount')) Posts#{arrow('postsCount')}
+          th
+            a(href=sortUrl('commentsCount')) Comments#{arrow('commentsCount')}
           th Actions
       tbody
         each user in users
@@ -28,5 +64,223 @@ block content
             td= user.birthday ? user.birthday.toISOString().slice(0, 10) : '-'
             td= user.status === 1 ? 'Active' : 'Inactive'
             td
+              a(href=`/users/${user.id}/posts`)= user.postsCount
+            td
+              a(href=`/users/${user.id}/comments`)= user.commentsCount
+            td
               a.btn(href=`/users/${user.id}`) Show
-              a.btn(href=`/users/${user.id}/comments`) Comments 
+              a.btn(href=`/users/${user.id}/comments`) Comments
+              button.icon-btn.btn-edit(
+                type='button',
+                title='Edit user',
+                data-id=user.id,
+                data-name=user.name,
+                data-age=user.age === null ? '' : user.age,
+                data-email=user.email,
+                data-birthday=user.birthday ? user.birthday.toISOString().slice(0, 10) : '',
+                data-status=user.status
+              ) ✏️
+              button.icon-btn.btn-delete(
+                type='button',
+                title='Delete user',
+                data-id=user.id,
+                data-name=user.name
+              ) 🗑️
+
+    if totalPages > 1
+      .pagination
+        if page > 1
+          a.btn(href=pageUrl(page - 1)) ← Prev
+        each p in Array.from({ length: totalPages }, (_, i) => i + 1)
+          if p === page
+            span.btn.btn-primary= p
+          else
+            a.btn(href=pageUrl(p))= p
+        if page < totalPages
+          a.btn(href=pageUrl(page + 1)) Next →
+
+    p.meta Showing page #{page} of #{totalPages} (#{total} users)
+
+  //- ===== Create user modal =====
+  .modal-overlay#createModal(hidden)
+    .modal
+      h2 Create user
+      #createErrors
+      form#createForm
+        div
+          label(for='c-name') Name *
+          input#c-name(type='text', name='name', required)
+        div
+          label(for='c-age') Age
+          input#c-age(type='number', name='age', min='0')
+        div
+          label(for='c-email') Email *
+          input#c-email(type='email', name='email', required)
+        div
+          label(for='c-password') Password *
+          input#c-password(type='password', name='password', required, minlength='6')
+        div
+          label(for='c-birthday') Birthday
+          input#c-birthday(type='date', name='birthday')
+        div
+          label(for='c-status') Status
+          select#c-status(name='status')
+            option(value='1') Active
+            option(value='0') Inactive
+        .modal-actions
+          button.btn.btn-primary(type='submit') Save
+          button.btn(type='button', data-close='createModal') Cancel
+
+  //- ===== Edit user modal =====
+  .modal-overlay#editModal(hidden)
+    .modal
+      h2 Edit user
+      #editErrors
+      form#editForm
+        input(type='hidden', name='id')
+        div
+          label(for='e-name') Name *
+          input#e-name(type='text', name='name', required)
+        div
+          label(for='e-age') Age
+          input#e-age(type='number', name='age', min='0')
+        div
+          label(for='e-email') Email *
+          input#e-email(type='email', name='email', required)
+        div
+          label(for='e-password') Password
+          input#e-password(type='password', name='password', minlength='6', placeholder='Leave blank to keep current password')
+        div
+          label(for='e-birthday') Birthday
+          input#e-birthday(type='date', name='birthday')
+        div
+          label(for='e-status') Status
+          select#e-status(name='status')
+            option(value='1') Active
+            option(value='0') Inactive
+        .modal-actions
+          button.btn.btn-primary(type='submit') Save
+          button.btn(type='button', data-close='editModal') Cancel
+
+  //- ===== Delete confirmation modal =====
+  .modal-overlay#deleteModal(hidden)
+    .modal
+      h2 Delete user
+      p#deleteMessage
+      .modal-actions
+        button.btn.btn-danger#deleteOkBtn(type='button') OK
+        button.btn(type='button', data-close='deleteModal') Cancel
+
+  script.
+    (function () {
+      function $(sel, ctx) { return (ctx || document).querySelector(sel); }
+
+      function openModal(id) { $('#' + id).hidden = false; }
+      function closeModal(id) { $('#' + id).hidden = true; }
+
+      document.querySelectorAll('[data-close]').forEach(function (btn) {
+        btn.addEventListener('click', function () { closeModal(btn.dataset.close); });
+      });
+
+      function showErrors(el, errors) {
+        el.innerHTML = '';
+        if (!errors || !errors.length) return;
+        var ul = document.createElement('ul');
+        ul.className = 'errors';
+        errors.forEach(function (msg) {
+          var li = document.createElement('li');
+          li.textContent = msg;
+          ul.appendChild(li);
+        });
+        el.appendChild(ul);
+      }
+
+      async function apiCall(url, method, body) {
+        var res = await fetch(url, {
+          method: method,
+          headers: body ? { 'Content-Type': 'application/json' } : undefined,
+          body: body ? JSON.stringify(body) : undefined,
+        });
+        var data = {};
+        try { data = await res.json(); } catch (e) { /* no body */ }
+        return { ok: res.ok, data: data };
+      }
+
+      // ----- Create -----
+      var btnCreate = $('#btnCreate');
+      var createForm = $('#createForm');
+      var createErrors = $('#createErrors');
+
+      btnCreate.addEventListener('click', function () {
+        createForm.reset();
+        showErrors(createErrors, []);
+        openModal('createModal');
+      });
+
+      createForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var body = Object.fromEntries(new FormData(createForm).entries());
+        var result = await apiCall('/api/users', 'POST', body);
+        if (result.ok) {
+          window.location.reload();
+        } else {
+          showErrors(createErrors, result.data.errors || ['Something went wrong.']);
+        }
+      });
+
+      // ----- Edit -----
+      var editForm = $('#editForm');
+      var editErrors = $('#editErrors');
+
+      document.querySelectorAll('.btn-edit').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          editForm.reset();
+          showErrors(editErrors, []);
+          editForm.elements.id.value = btn.dataset.id;
+          editForm.elements.name.value = btn.dataset.name || '';
+          editForm.elements.age.value = btn.dataset.age || '';
+          editForm.elements.email.value = btn.dataset.email || '';
+          editForm.elements.birthday.value = btn.dataset.birthday || '';
+          editForm.elements.status.value = btn.dataset.status || '1';
+          openModal('editModal');
+        });
+      });
+
+      editForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var body = Object.fromEntries(new FormData(editForm).entries());
+        var id = body.id;
+        delete body.id;
+        if (!body.password) delete body.password;
+        var result = await apiCall('/api/users/' + id, 'PUT', body);
+        if (result.ok) {
+          window.location.reload();
+        } else {
+          showErrors(editErrors, result.data.errors || ['Something went wrong.']);
+        }
+      });
+
+      // ----- Delete -----
+      var deleteMessage = $('#deleteMessage');
+      var deleteOkBtn = $('#deleteOkBtn');
+      var pendingDeleteId = null;
+
+      document.querySelectorAll('.btn-delete').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          pendingDeleteId = btn.dataset.id;
+          deleteMessage.textContent = 'Are you sure you want to delete "' + btn.dataset.name + '"?';
+          openModal('deleteModal');
+        });
+      });
+
+      deleteOkBtn.addEventListener('click', async function () {
+        if (!pendingDeleteId) return;
+        var result = await apiCall('/api/users/' + pendingDeleteId, 'DELETE');
+        if (result.ok) {
+          window.location.reload();
+        } else {
+          closeModal('deleteModal');
+          alert((result.data.errors || ['Something went wrong.']).join('\n'));
+        }
+      });
+    })();

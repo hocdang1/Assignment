@@ -1,0 +1,24 @@
+extends ../layout
+
+block content
+  h1= user.name
+  p: a(href='/users') ← Back to users
+  ul
+    li Email: #{user.email}
+    li Age: #{user.age}
+    if user.profile
+      li Address: #{user.profile.address}
+      li Tel: #{user.profile.tel}
+      li Province: #{user.profile.province}
+
+  h2 Posts (#{user.posts ? user.posts.length : 0})
+  p: a(href=`/users/${user.id}/posts`) View all posts
+  ul
+    each post in user.posts
+      li= post.content
+
+  h2 Comments (#{user.comments ? user.comments.length : 0})
+  p: a(href=`/users/${user.id}/comments`) View all comments
+  ul
+    each comment in user.comments
+      li= comment.content

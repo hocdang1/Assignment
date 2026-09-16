@@ -1,0 +1,21 @@
+extends ../layout
+
+block content
+  h1 Create user
+  form(method='POST', action='/users')
+    div
+      label Name
+      input(name='name', required)
+    div
+      label Email
+      input(name='email', type='email', required)
+    div
+      label Password
+      input(name='password', type='password', required)
+    div
+      label Age
+      input(name='age', type='number')
+    div
+      label Birthday
+      input(name='birthday', type='date')
+    button(type='submit') Create

@@ -1,0 +1,31 @@
+<%- include('../partials/header') %>
+
+<h1><%= user.name %></h1>
+<p><a href="/users">← Back to users</a></p>
+<ul>
+  <li>Email: <%= user.email %></li>
+  <li>Age: <%= user.age %></li>
+  <% if (user.profile) { %>
+    <li>Address: <%= user.profile.address %></li>
+    <li>Tel: <%= user.profile.tel %></li>
+    <li>Province: <%= user.profile.province %></li>
+  <% } %>
+</ul>
+
+<h2>Posts (<%= user.posts ? user.posts.length : 0 %>)</h2>
+<p><a href="/users/<%= user.id %>/posts">View all posts</a></p>
+<ul>
+  <% (user.posts || []).forEach(function (post) { %>
+    <li><%= post.content %></li>
+  <% }); %>
+</ul>
+
+<h2>Comments (<%= user.comments ? user.comments.length : 0 %>)</h2>
+<p><a href="/users/<%= user.id %>/comments">View all comments</a></p>
+<ul>
+  <% (user.comments || []).forEach(function (comment) { %>
+    <li><%= comment.content %></li>
+  <% }); %>
+</ul>
+
+<%- include('../partials/footer') %>

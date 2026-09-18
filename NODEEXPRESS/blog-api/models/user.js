@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
     modelName: 'User',
     tableName: 'users',
     underscored: true,
-    defaultScope: { attributes: { exclude: ['password'] } },  // không trả password
+    defaultScope: { attributes: { exclude: ['password'] } },  
   });
 
   return User;

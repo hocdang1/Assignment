@@ -1,0 +1,32 @@
+<%- include('../partials/header') %>
+
+<% if (comments.length === 0) { %>
+  <p class="empty">No comments yet.</p>
+<% } else { %>
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Content</th>
+        <th>Author</th>
+        <th>Post</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% comments.forEach(function (comment) { %>
+        <tr>
+          <td><%= comment.id %></td>
+          <td><%= comment.content %></td>
+          <td><%= comment.author ? comment.author.name : '-' %></td>
+          <td><%= comment.post ? comment.post.content : '-' %></td>
+          <td>
+            <a class="btn" href="/comments/<%= comment.id %>/user">Show user</a>
+          </td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+<% } %>
+
+<%- include('../partials/footer') %>

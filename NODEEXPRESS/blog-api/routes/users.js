@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 
-// ⚠️ /create PHẢI đặt trước /:id
+//create PHẢI đặt trước /:id
 router.get('/create', userController.createForm);
 
 router.get('/', userController.index);

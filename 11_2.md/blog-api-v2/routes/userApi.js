@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 const userApi = require('../controllers/userApiController');
 
-router.post('/', userApi.create);
+router.post('/', userApi.store);
 router.put('/:id', userApi.update);
-router.delete('/:id', userApi.remove);
+router.delete('/:id', userApi.destroy);
 
 module.exports = router;

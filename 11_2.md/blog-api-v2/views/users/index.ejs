@@ -1,0 +1,105 @@
+<%- include('../partials/header') %>
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+>
+<button onclick="openForm()">+ Create user</button>
+
+<form method="GET" action="/users">
+  <input name="q" placeholder="Search by name..." value="<%= q || '' %>">
+  <button>Search</button>
+</form>
+
+<table>
+  <tr>
+    <th>ID</th>
+    <th>Name</th>
+    <th>Age</th>
+    <th>Email</th>
+    <th>Birthday</th>
+    <th>Status</th>
+    <th>Action</th>
+  </tr>
+  <% users.forEach(function (user) {
+    const birthday = user.birthday ? user.birthday.toISOString().slice(0, 10) : '';
+    const form = { id: user.id, name: user.name, age: user.age, email: user.email, birthday, status: user.status };
+  %>
+    <tr>
+      <td><%= user.id %></td>
+      <td><%= user.name %></td>
+      <td><%= user.age %></td>
+      <td><%= user.email %></td>
+      <td><%= birthday %></td>
+      <td><%= user.status === 1 ? 'Active' : 'Inactive' %></td>
+      <td>
+        <button data-user="<%= JSON.stringify(form) %>" onclick="openForm(JSON.parse(this.dataset.user))">Edit <i class="fa-solid fa-pen"></i> 
+</button>
+        <button data-id="<%= user.id %>" onclick="removeUser(this.dataset.id)">Delete <i class="fa-solid fa-trash"></i></button>
+      </td>
+    </tr>
+  <% }); %>
+</table>
+
+<p>
+  <% if (page > 1) { %><a href="/users?q=<%= encodeURIComponent(q) %>&page=<%= page - 1 %>">Prev</a><% } %>
+  Page <%= page %> / <%= totalPages %>
+  <% if (page < totalPages) { %><a href="/users?q=<%= encodeURIComponent(q) %>&page=<%= page + 1 %>">Next</a><% } %>
+</p>
+
+<!--  create and edit -->
+<dialog id="userDialog">
+  <form id="userForm">
+    <input type="hidden" name="id">
+    <p><label>Name <input name="name" required></label></p>
+    <p><label>Age <input name="age" type="number" min="0"></label></p>
+    <p><label>Email <input name="email" type="email" required></label></p>
+    <p><label>Password <input name="password" type="password" minlength="6" placeholder="Blank = keep current"></label></p>
+    <p><label>Birthday <input name="birthday" type="date"></label></p>
+    <p><label>Status
+      <select name="status">
+        <option value="1">Active</option>
+        <option value="0">Inactive</option>
+      </select>
+    </label></p>
+    <button>Save</button>
+    <button type="button" onclick="userDialog.close()">Cancel</button>
+  </form>
+</dialog>
+
+<script>
+  const userDialog = document.getElementById('userDialog');
+  const userForm = document.getElementById('userForm');
+
+  async function send(url, method, body) {
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (res.ok) return location.reload();
+    const data = await res.json().catch(() => ({}));
+    alert((data.errors || ['Something went wrong.']).join('\n'));
+  }
+
+  function openForm(user = {}) {
+    userForm.reset();
+    for (const key in user) userForm.elements[key].value = user[key] ?? '';
+    userForm.elements.password.required = !user.id;
+    userDialog.showModal();
+  }
+
+  userForm.onsubmit = function (e) {
+    e.preventDefault();
+    const body = Object.fromEntries(new FormData(userForm));
+    const id = body.id;
+    delete body.id;
+    if (!body.password) delete body.password;
+    send(id ? '/api/users/' + id : '/api/users', id ? 'PUT' : 'POST', body);
+  };
+
+  function removeUser(id) {
+    if (confirm('Delete this user?')) send('/api/users/' + id, 'DELETE');
+  }
+</script>
+
+<%- include('../partials/footer') %>

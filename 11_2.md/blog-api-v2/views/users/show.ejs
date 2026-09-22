@@ -1,0 +1,99 @@
+<%- include('../partials/header') %>
+
+<section>
+  <h2>Information</h2>
+  <table class="detail">
+    <tr>
+      <th>ID</th>
+      <td><%= user.id %></td>
+    </tr>
+    <tr>
+      <th>Name</th>
+      <td><%= user.name %></td>
+    </tr>
+    <tr>
+      <th>Age</th>
+      <td><%= user.age %></td>
+    </tr>
+    <tr>
+      <th>Email</th>
+      <td><%= user.email %></td>
+    </tr>
+    <tr>
+      <th>Birthday</th>
+      <td><%= user.birthday ? user.birthday.toISOString().slice(0, 10) : '-' %></td>
+    </tr>
+    <tr>
+      <th>Status</th>
+      <td><%= user.status === 1 ? 'Active' : 'Inactive' %></td>
+    </tr>
+  </table>
+</section>
+
+<section>
+  <h2>Profile</h2>
+  <% if (profile) { %>
+    <table class="detail">
+      <tr>
+        <th>Address</th>
+        <td><%= profile.address %></td>
+      </tr>
+      <tr>
+        <th>Tel</th>
+        <td><%= profile.tel %></td>
+      </tr>
+      <tr>
+        <th>Province</th>
+        <td><%= profile.province %></td>
+      </tr>
+    </table>
+  <% } else { %>
+    <p class="empty">No profile.</p>
+  <% } %>
+</section>
+
+<section>
+  <h2>Posts (<%= posts.length %>)</h2>
+  <% if (posts.length) { %>
+    <ul>
+      <% posts.forEach(function (post) { %>
+        <li>
+          <%= post.content %>
+          <% if (post.comments && post.comments.length) { %>
+            <ul>
+              <% post.comments.forEach(function (c) { %>
+                <li><%= c.content %></li>
+              <% }); %>
+            </ul>
+          <% } %>
+        </li>
+      <% }); %>
+    </ul>
+  <% } else { %>
+    <p class="empty">No posts.</p>
+  <% } %>
+</section>
+
+<section>
+  <h2>Comments (<%= comments.length %>)</h2>
+  <% if (comments.length) { %>
+    <ul>
+      <% comments.forEach(function (comment) { %>
+        <li>
+          <%= comment.content %>
+          <% if (comment.post) { %>
+            <small> (on post #<%= comment.post.id %>)</small>
+          <% } %>
+        </li>
+      <% }); %>
+    </ul>
+  <% } else { %>
+    <p class="empty">No comments.</p>
+  <% } %>
+</section>
+
+<p>
+  <a href="/users">← Back to user list</a>
+</p>
+
+<%- include('../partials/footer') %>
